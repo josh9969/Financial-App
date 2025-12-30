@@ -1,24 +1,19 @@
 import pandas as pd
 from datetime import datetime
 
-def monthly_summary(df, salary):
-    current_month = datetime.now().month
-    current_year = datetime.now().year
+def expense_dataframe(raw_data):
+    df = pd.DataFrame(
+        raw_data,
+        columns=["id", "date", "category", "amount", "note"]
+    )
+    if not df.empty:
+        df["date"] = pd.to_datetime(df["date"])
+    return df
 
-    df["date"] = pd.to_datetime(df["date"])
-    month_df = df[
-        (df["date"].dt.month == current_month) &
-        (df["date"].dt.year == current_year)
+def current_month_df(df):
+    now = datetime.now()
+    return df[
+        (df["date"].dt.month == now.month) &
+        (df["date"].dt.year == now.year)
     ]
 
-    total_spent = month_df["amount"].sum()
-    remaining = salary - total_spent
-
-    days_left = (
-        (pd.Timestamp.now().replace(day=1) + pd.offsets.MonthEnd(1)) -
-        pd.Timestamp.now()
-    ).days + 1
-
-    daily_limit = remaining / days_left if days_left > 0 else 0
-
-    return total_spent, remaining, daily_limit, month_df
